@@ -1,0 +1,1 @@
+# Create an Laravel application to queue booking tickets
