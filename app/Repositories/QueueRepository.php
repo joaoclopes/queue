@@ -9,9 +9,4 @@ class QueueRepository
     public function __construct()
     {
     }
-
-    public function create($data)
-    {
-        return 'pipizao';
-    }
 }

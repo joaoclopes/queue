@@ -4,9 +4,9 @@ services:
   laravel.test:
     image: sail-8.2/app
     ports:
-      - '80:80'
+      - '8000:8000'
     environment:
-      - APP_URL=http://localhost
+      - APP_URL=http://localhost:8000
     volumes:
       - '.:/var/www/html'
     networks:
