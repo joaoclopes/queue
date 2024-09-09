@@ -10,13 +10,15 @@
     <div id="messages"></div>
 
     <script>
-        const eventSource = new EventSource('api/v1/sse');
+        const url = 'api/v1/sse';
+        const eventSource = new EventSource(url);
 
         eventSource.onmessage = function(event) {
             const message = JSON.parse(event.data).message;
             document.getElementById('messages').innerHTML = `<p>${message}</p>`;
             if (JSON.parse(event.data).position == 0) {
                 eventSource.close();
+                window.location = "/form";
             }
         };
 
