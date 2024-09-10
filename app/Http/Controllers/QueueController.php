@@ -37,13 +37,18 @@ class QueueController
         $queueId = $request->input('event_id');
         $userId = $request->input('user_id');
         return response()->stream(function () use ($queueId, $userId) {
-            $queuePosition = $this->queueService->getQueuePosition('event:034ada7d-d05b-45a2-8d75-20b812301b11', 'd218e4e5-6a1f-4a2a-b15e-4e6371149898');
+            $queuePosition = $this->queueService->getQueuePosition('event:9cfa6d66-9dc7-41dc-929d-86d18da78d14', '9cfa6cb5-0af7-4f91-99e5-a22f416e65b5');
             // Loop que verifica a posicao na fila e envia pro front a posicao na fila a cada X segundos
             while ($queuePosition > 0) {
-                $redisQueuePosition = $this->queueService->getQueuePosition('event:034ada7d-d05b-45a2-8d75-20b812301b11', 'd218e4e5-6a1f-4a2a-b15e-4e6371149898');
-                $message = $redisQueuePosition == 0 ?
-                    'Parabens, voce sera redirecionado para comprar seu ingresso' :
-                    'Posicao na fila: ' . $redisQueuePosition;
+                $redisQueuePosition = $this->queueService->getQueuePosition('event:9cfa6d66-9dc7-41dc-929d-86d18da78d14', '9cfa6cb5-0af7-4f91-99e5-a22f416e65b5');
+                $message = 'Posicao na fila: ' . $redisQueuePosition;
+                // Regra para ver se e o proximo a ser atendido
+                if ($redisQueuePosition == 1) {
+                    $userCanBuy = $this->queueService->checkIfUserCanBuy('event:9cfa6d66-9dc7-41dc-929d-86d18da78d14', '9cfa6cb5-0af7-4f91-99e5-a22f416e65b5');
+                    if ($userCanBuy) {
+                        $message = 'Parabens, voce sera redirecionado para comprar seu ingresso';
+                    };
+                }
                 // Envia uma mensagem para o cliente
                 echo "data: " . json_encode(
                         [
@@ -55,14 +60,10 @@ class QueueController
                 // Limpa o buffer de saída e envia o conteúdo
                 ob_flush();
                 flush();
+                if (isset($userCanBuy)) break;
 
                 // Espera 1 segundo antes de enviar a próxima mensagem
                 sleep(5);
-                // Regra para ver se e o proximo a ser atendido
-                if ($redisQueuePosition == 1) {
-                    $this->queueService->updateQueuePosition('event:034ada7d-d05b-45a2-8d75-20b812301b11', 'decaa1dc-9c8c-4d4f-b82d-873fc00500cc');
-                    break;
-                }
             }
         }, 200, [
             'Content-Type' => 'text/event-stream',

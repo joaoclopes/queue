@@ -2,13 +2,24 @@
 
 namespace App\Services;
 
+use App\Repositories\EventRepository;
 use App\Repositories\QueueRepository;
 use Illuminate\Support\Facades\Redis;
 
 class QueueService
 {
-    public function __construct(private QueueRepository $queueRepository)
+    public function __construct(private QueueRepository $queueRepository, private EventRepository $eventRepository)
     {
+    }
+
+    private function getQueue($queueKey)
+    {
+        return json_decode(Redis::get($queueKey));
+    }
+
+    private function setQueue($queueKey, $data)
+    {
+        return Redis::set($queueKey, json_encode($data));
     }
 
     public function getQueuePosition($queueId, $userId)
@@ -20,7 +31,7 @@ class QueueService
     public function updateQueuePosition($queueKey, $userId)
     {
         $queue = $this->getQueue($queueKey);
-        return $this->setQueue($queueKey, array_diff($queue, [$userId]));
+        return $this->setQueue($queueKey, array_values(array_diff($queue, [$userId])));
     }
 
     public function insertUserInQueue($queueId, $userId)
@@ -35,13 +46,15 @@ class QueueService
         return $this->setQueue($redisQueueKey, $queue);
     }
 
-    private function getQueue($queueKey)
+    public function checkIfUserCanBuy($eventId, $userId)
     {
-        return json_decode(Redis::get($queueKey));
-    }
+        $event = $this->eventRepository->getById($eventId);
+        if ($event->slots_available <= 0) {
+            return false;
+        }
 
-    private function setQueue($queueKey, $data)
-    {
-        return Redis::set($queueKey, json_encode($data));
+        $this->eventRepository->updateSlotsAvailable($eventId);
+        $this->updateQueuePosition('event:' . $eventId, $userId);
+        return true;
     }
 }

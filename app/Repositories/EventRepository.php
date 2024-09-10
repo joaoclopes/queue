@@ -22,4 +22,17 @@ class EventRepository
 
         return $event->users()->attach($user->id);
     }
+
+    public function getById($eventId)
+    {
+        return Event::find($eventId);
+    }
+
+    public function updateSlotsAvailable($eventId)
+    {
+        $event = $this->getById($eventId);
+        $event->slots_available -= 1;
+        $event->save();
+        return $event;
+    }
 }

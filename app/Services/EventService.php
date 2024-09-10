@@ -6,7 +6,7 @@ use App\Repositories\EventRepository;
 
 class EventService
 {
-    public function __construct(private EventRepository $eventRepository)
+    public function __construct(private EventRepository $eventRepository, private QueueService $queueService)
     {
     }
 
@@ -17,6 +17,8 @@ class EventService
 
     public function addUserToEvent($data)
     {
+        $this->queueService->updateQueuePosition('event:' . $data['event_id'], $data['user_id']);
+        $this->eventRepository->updateSlotsAvailable($data['event_id']);
         return $this->eventRepository->addUserToEvent($data);
     }
 }
