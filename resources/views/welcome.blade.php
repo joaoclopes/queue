@@ -10,7 +10,7 @@
     <div id="messages"></div>
 
     <script>
-        const url = 'api/v1/sse';
+        const url = 'api/v1/queue/status';
         const eventSource = new EventSource(url);
 
         eventSource.onmessage = function(event) {
