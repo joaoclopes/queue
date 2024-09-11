@@ -1,31 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste de fila</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Queue Position</title>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 </head>
 <body>
-    <h1>Sistema de fila com Redis e SSE</h1>
-    <div id="messages"></div>
+  <script>
+    const socket = io('http://localhost:3000/queue'); // Conecta ao WebSocket na namespace 'queue'
 
-    <script>
-        const url = 'api/v1/queue/status';
-        const eventSource = new EventSource(url);
+    function manageQueue(userId, queueId) {
+      socket.emit('manageQueue', { userId, queueId });
+    }
 
-        eventSource.onmessage = function(event) {
-            const message = JSON.parse(event.data).message;
-            document.getElementById('messages').innerHTML = `<p>${message}</p>`;
-            if (JSON.parse(event.data).position == 0) {
-                eventSource.close();
-                window.location = "/form";
-            }
-        };
+    socket.on('queuePosition', (data) => {
+      console.log(`User ${data.userId} position in queue: ${data.position}`);
+      // Regras negociais, ex: ta na posicao 1? pode comprar?
+    });
 
-        eventSource.onerror = function() {
-            console.error("Erro na conexão com o SSE.");
-            eventSource.close();
-        };
-    </script>
+    // Funcao para conectar-se ao web socket
+    const userId = 'user123';
+    const queueId = 'queue456';
+    manageQueue(userId, queueId);
+  </script>
 </body>
 </html>
