@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'check.user.limit' => \App\Http\Middleware\CheckUserLimit::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

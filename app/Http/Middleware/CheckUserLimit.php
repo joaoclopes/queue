@@ -2,38 +2,35 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\EventService;
 use Closure;
+use App\Services\EventService;
 use Illuminate\Support\Facades\Redis;
-use Illuminate\Http\Request;
 
 class CheckUserLimit
 {
+    protected $eventService;
 
-    public function __construct(private EventService $eventService)
+    public function __construct(EventService $eventService)
     {
+        $this->eventService = $eventService;
     }
 
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
-     */
-    public function handle(Request $request, Closure $next)
+    public function handle($request, Closure $next)
     {
-        $ticketIsAvailable = $this->eventService->checkIfTicketIsAvailable($request->input('event_id'));
+        $eventId = $request->input('event_id');
+        $ticketIsAvailable = $this->eventService->checkIfTicketIsAvailable($eventId);
         if (!$ticketIsAvailable) {
+            // ingressos esgostados, montar alguma comunicacao com o gerenciador de fila pra rancar a fila e notificar os clientes que ainda estao na fila
             return response()->json(['message' => 'Infelizmente os ingressos para o evento estao esgotados.'], 429);
         }
 
-        $userCanBuy = $this->eventService->checkIfUserCanBuy($request->all());
+        $userCanBuy = $this->eventService->checkIfHasQueue($eventId, $request->input('user_id'));
         if (!$userCanBuy) {
-            // fazer o usuario entra na fila
+            // fazer o usuario entrar na fila
             return response()->json(['message' => 'Voce foi inserido na fila, aguarde para ver se algum ticket volta para a compra.'], 201);
         }
 
+        return $next($request);
         // Verifica o número atual de usuários ativos
         $currentCount = Redis::get($userCanBuy);
         $currentCount = $currentCount ? (int) $currentCount : 0;

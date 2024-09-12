@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class EventService
 {
-    public function __construct(private EventRepository $eventRepository)
+    public function __construct(protected EventRepository $eventRepository, protected Client $client)
     {
     }
 
@@ -30,21 +30,46 @@ class EventService
         return ($event->slots > $event->users()->count());
     }
 
-    public function checkIfUserCanBuy($eventId)
+    public function checkIfHasQueue($eventId, $userId)
     {
-        
+        $redisLock = $this->eventRepository->catchAmountOfRegisteringUsers($eventId);
+        if (!$redisLock) {
+            $this->eventRepository->insertUserInLock($eventId, $userId);
+            return true;
+        }
+
+        $this->insertUserInQueue($eventId, $userId);
+        return false;
     }
 
     public function checkQueueEvent($eventId)
     {
-        $client = new Client();
         try {
-            $response = $client->post(env('ORCHESTRATOR_URL'), [
+            $response = $this->client->post(env('ORCHESTRATOR_URL') . '/get-queue-url', [
                 'headers' => [
                     'Accept' => 'application/json',
                 ],
                 'event_id' => $eventId,
             ]);
+
+            return json_decode($response->getBody(), true);
+        } catch (CustomException $e) {
+            Log::error($e->getMessage());
+            return false;
+        }
+    }
+
+    public function insertUserInQueue($eventId, $userId)
+    {
+        try {
+            $response = $this->client->post(env('ORCHESTRATOR_URL') . '/queue/add', [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+                'event_id' => $eventId,
+                'user_id' => $userId
+            ]);
+            dd(json_decode($response->getBody(), true));
 
             return json_decode($response->getBody(), true);
         } catch (CustomException $e) {

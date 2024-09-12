@@ -12,7 +12,7 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('event')->group(function () {
         Route::post('/', [EventController::class, 'store']);
-        Route::post('/user', [EventController::class, 'addUserToEvent']);
+        Route::post('/user', [EventController::class, 'addUserToEvent'])->middleware(['check.user.limit']);
     });
 
     Route::post('/submit', [FormController::class, 'submit'])->name('form.submit');
