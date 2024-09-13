@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Abstracts\CustomException;
+use App\Exceptions\TicketSoldOutException;
 use App\Http\Requests\Event\StoreEventRequest;
 use App\Http\Requests\Event\StoreEventUserRequest;
 use App\Services\EventService;
@@ -59,6 +60,5 @@ class EventController
                 'message' => 'Ocorreu um erro atrelar o usuario ao evento, tente novamente mais tarde! Error: ' . $e->getMessage()
             ], 500);
         }
-        
     }
 }

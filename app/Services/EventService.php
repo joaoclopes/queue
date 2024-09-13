@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Abstracts\CustomException;
+use App\Exceptions\QueueWaitException;
+use App\Exceptions\TicketSoldOutException;
 use App\Repositories\EventRepository;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
@@ -20,8 +22,22 @@ class EventService
 
     public function addUserToEvent($data)
     {
-        $this->eventRepository->updateSlotsAvailable($data['event_id']);
-        return $this->eventRepository->addUserToEvent($data);
+        $eventId = $data['event_id'];
+        $ticketIsAvailable = $this->checkIfTicketIsAvailable($eventId);
+        if (!$ticketIsAvailable) {
+            // ingressos esgostados, montar alguma comunicacao com o gerenciador de fila
+            // pra rancar a fila e notificar os clientes que ainda estao na fila
+            throw new TicketSoldOutException();
+        }
+
+        $userCanBuy = $this->checkIfHasQueue($eventId, $data['user_id']);
+        if (!$userCanBuy) {
+            // fazer o usuario entrar na fila
+            throw new QueueWaitException();
+        }
+        // $this->eventRepository->updateSlotsAvailable($data['event_id']);
+        // return $this->eventRepository->addUserToEvent($data);
+        return true;
     }
 
     public function checkIfTicketIsAvailable($eventId)
@@ -32,49 +48,13 @@ class EventService
 
     public function checkIfHasQueue($eventId, $userId)
     {
+        $event = $this->eventRepository->getById($eventId);
         $redisLock = $this->eventRepository->catchAmountOfRegisteringUsers($eventId);
-        if (!$redisLock) {
+        if (!$redisLock || $redisLock <= $event->slots_available) {
             $this->eventRepository->insertUserInLock($eventId, $userId);
             return true;
         }
 
-        $this->insertUserInQueue($eventId, $userId);
         return false;
-    }
-
-    public function checkQueueEvent($eventId)
-    {
-        try {
-            $response = $this->client->post(env('ORCHESTRATOR_URL') . '/get-queue-url', [
-                'headers' => [
-                    'Accept' => 'application/json',
-                ],
-                'event_id' => $eventId,
-            ]);
-
-            return json_decode($response->getBody(), true);
-        } catch (CustomException $e) {
-            Log::error($e->getMessage());
-            return false;
-        }
-    }
-
-    public function insertUserInQueue($eventId, $userId)
-    {
-        try {
-            $response = $this->client->post(env('ORCHESTRATOR_URL') . '/queue/add', [
-                'headers' => [
-                    'Accept' => 'application/json',
-                ],
-                'event_id' => $eventId,
-                'user_id' => $userId
-            ]);
-            dd(json_decode($response->getBody(), true));
-
-            return json_decode($response->getBody(), true);
-        } catch (CustomException $e) {
-            Log::error($e->getMessage());
-            return false;
-        }
     }
 }

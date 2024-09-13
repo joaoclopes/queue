@@ -39,12 +39,12 @@ class EventRepository
 
     public function catchAmountOfRegisteringUsers($eventId)
     {
-        return Redis::lrange('lock_event:' . $eventId, 0, -1);
+        return Redis::get('lock_event:' . $eventId);
     }
 
-    public function insertUserInLock($eventId, $userId)
+    public function insertUserInLock($eventId)
     {
         $redisKey = 'lock_event:' . $eventId;
-        Redis::lpush($redisKey, $userId);
+        Redis::incr($redisKey);
     }
 }
