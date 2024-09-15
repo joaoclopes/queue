@@ -13,7 +13,7 @@ class EventController
     public function __construct(private EventService $eventService)
     {
     }
-    
+
     public function store(StoreEventRequest $request)
     {
         try {
@@ -30,7 +30,7 @@ class EventController
                 'success' => true,
                 'message' => 'O evento foi criado com sucesso!',
             ], 200);
-        } catch(CustomException $e) {
+        } catch (CustomException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Ocorreu um erro criar o evento, tente novamente mais tarde! Error: ' . $e->getMessage()
@@ -54,11 +54,15 @@ class EventController
                 'success' => true,
                 'message' => 'O usuario foi inscrito no evento com sucesso!',
             ], 200);
-        } catch(CustomException $e) {
+        } catch (CustomException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Ocorreu um erro atrelar o usuario ao evento, tente novamente mais tarde! Error: ' . $e->getMessage()
             ], 500);
         }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     }
 }
