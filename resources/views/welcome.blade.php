@@ -3,65 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Comrpar Ingresso</title>
+  <title>Comprar Ingresso</title>
   <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .queue-container {
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 30px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
-      width: 100%;
-    }
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-    .input-group {
-      margin-bottom: 20px;
-    }
-    label {
-      font-size: 14px;
-      color: #555;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      margin-top: 5px;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #218838;
-    }
-    .message {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-      color: #666;
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 </head>
 <body>
   <div class="queue-container">
@@ -83,31 +28,48 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       const userId = document.getElementById('userId').value;
+      const eventId = '9cfa6d66-9dc7-41dc-929d-86d18da78d14';
 
-      const socket = io('http://localhost:3000/monitoring', { withCredentials: true });
-      const queueId = '9cfa6d66-9dc7-41dc-929d-86d18da78d14';
-      
-      socket.emit('manageQueue', { userId, queueId });
-
-      socket.on('queuePosition', (data) => {
-        message.textContent = `Your position in queue: ${data.position}`;
-      });
-
-      fetch('/buy-ticket', {
+      fetch('/api/v1/event/user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           'X-CSRF-TOKEN': '{{ csrf_token() }}'
         },
-        body: JSON.stringify({ userId })
+        body: JSON.stringify({
+          user_id: userId,
+          event_id: eventId
+        })
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          Swal.fire({
+            title: 'Erro na requisicao!',
+            html: 'Ocorreu um erro na sua requisicao, tente novamente por gentileza!',
+            icon: 'error',
+            timer: 15000,
+            showConfirmButton: true
+          });
+        }
+
+        return response.json();
+      })
       .then(data => {
-        message.textContent = data.message || 'Joined the queue successfully!';
+        if (data.status == 409) {
+        const url = new URL(data.redirect);
+        url.searchParams.append('user_id', data.user_id);
+        url.searchParams.append('event_id', data.event_id);
+        window.location.href = url.toString();
+      }
       })
       .catch(error => {
-        message.textContent = 'An error occurred. Please try again.';
-        console.error('Error:', error);
+        Swal.fire({
+            title: 'Ocorreu um erro ao tentar comprar o ingresso!',
+            html: 'Infelizmente ocorreu um erro no sistema, tente novamente!',
+            icon: 'error',
+            showConfirmButton: true
+          });
       });
     });
   </script>

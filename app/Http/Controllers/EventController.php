@@ -60,9 +60,5 @@ class EventController
                 'message' => 'Ocorreu um erro atrelar o usuario ao evento, tente novamente mais tarde! Error: ' . $e->getMessage()
             ], 500);
         }
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
     }
 }

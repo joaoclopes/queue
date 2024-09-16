@@ -7,18 +7,19 @@ use Illuminate\Http\JsonResponse;
 
 class QueueWaitException extends Exception
 {
-    // Construtor opcional para uma mensagem personalizada
     public function __construct($message = "O sistema está cheio, você entrou na fila e terá que aguardar.")
     {
         parent::__construct($message);
     }
 
-    // Método para renderizar a exceção como uma resposta HTTP
     public function render($request): JsonResponse
     {
         return response()->json([
-            'error' => 'Queue Wait',
+            'status' => 409,
+            'redirect' => route('queue'),
             'message' => $this->getMessage(),
-        ], 202); // Código HTTP 202: Accepted (indicando que o pedido foi aceito, mas ainda não processado)
+            'user_id' => $request->input('user_id'),
+            'event_id' => $request->input('event_id')
+        ], 409);
     }
 }

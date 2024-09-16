@@ -9,12 +9,6 @@
 <body class="bg-gray-100 flex items-center justify-center h-screen">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 class="text-2xl font-bold mb-6 text-center">Comprar Ingresso</h2>
-
-        @if (session('success'))
-            <div class="mb-4 text-green-500">
-                {{ session('success') }}
-            </div>
-        @endif
         
         @if ($errors->any())
             <div class="mb-4">
