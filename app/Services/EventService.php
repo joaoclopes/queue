@@ -2,16 +2,14 @@
 
 namespace App\Services;
 
-use App\Abstracts\CustomException;
 use App\Exceptions\QueueWaitException;
 use App\Exceptions\TicketSoldOutException;
 use App\Repositories\EventRepository;
-use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
 class EventService
 {
-    public function __construct(protected EventRepository $eventRepository, protected Client $client)
+    public function __construct(protected EventRepository $eventRepository)
     {
     }
 
@@ -50,8 +48,25 @@ class EventService
     {
         $event = $this->eventRepository->getById($eventId);
         $redisLock = $this->eventRepository->catchAmountOfRegisteringUsers($eventId);
-        if (!$redisLock || $redisLock <= $event->slots_available) {
+        if (!$redisLock || $redisLock < $event->slots_available) {
             $this->eventRepository->insertUserInLock($eventId, $userId);
+            return true;
+        }
+
+        return false;
+    }
+
+    public function checkEventStatus($data)
+    {
+        $event = $this->eventRepository->getById($data['event_id']);
+        // Validar se ainda tem ticket disponivel para compra
+        if (!$this->checkIfTicketIsAvailable($event->id)) {
+            throw new TicketSoldOutException();
+        }
+
+        $redisLock = $this->eventRepository->catchAmountOfRegisteringUsers($event->id);
+        // verifica se tem menos usuarios no redisLock que vagas disponiveis
+        if (!$redisLock || $redisLock < $event->slots_available) {
             return true;
         }
 

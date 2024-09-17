@@ -13,8 +13,8 @@ class User extends Model
 
     protected $fillable = ['name', 'birth_date', 'email'];
 
-    public function events(): BelongsToMany
+    public function batches(): BelongsToMany
     {
-        return $this->belongsToMany(Event::class, 'event_user', 'user_id', 'event_id');
+        return $this->belongsToMany(Batch::class, 'batch_user', 'user_id', 'batch_id');
     }
 }

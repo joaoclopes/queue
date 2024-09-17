@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Event extends Model
 {
@@ -13,8 +13,8 @@ class Event extends Model
 
     protected $fillable = ['name', 'slots', 'slots_available'];
 
-    public function users(): BelongsToMany
+    public function batches(): HasMany
     {
-        return $this->belongsToMany(User::class, 'event_user', 'event_id', 'user_id');
+        return $this->hasMany(Batch::class, 'event_id');
     }
 }

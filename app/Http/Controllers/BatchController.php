@@ -3,42 +3,42 @@
 namespace App\Http\Controllers;
 
 use App\Abstracts\CustomException;
-use App\Http\Requests\Event\CheckEventStatusRequest;
-use App\Http\Requests\Event\StoreEventRequest;
-use App\Http\Requests\Event\StoreEventUserRequest;
-use App\Services\EventService;
+use App\Http\Requests\Batch\CheckBatchStatusRequest;
+use App\Http\Requests\Batch\BuyBatchRequest;
+use App\Http\Requests\Batch\StoreBatchRequest;
+use App\Services\BatchService;
 
-class EventController
+class BatchController
 {
-    public function __construct(private EventService $eventService)
+    public function __construct(private BatchService $batchService)
     {
     }
 
-    public function store(StoreEventRequest $request)
+    public function store(StoreBatchRequest $request)
     {
         try {
             $data = $request->validated();
             if (!$data) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Ocorreu um erro criar o evento, preencha os dados corretamente!'
+                    'message' => 'Ocorreu um erro criar o lote, preencha os dados corretamente!'
                 ], 400);
             }
-            $this->eventService->store($data);
+            $this->batchService->store($data);
 
             return response()->json([
                 'success' => true,
-                'message' => 'O evento foi criado com sucesso!',
+                'message' => 'O lote foi criado com sucesso!',
             ], 200);
         } catch (CustomException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ocorreu um erro criar o evento, tente novamente mais tarde! Error: ' . $e->getMessage()
+                'message' => 'Ocorreu um erro criar o lote, tente novamente mais tarde! Error: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    public function addUserToEvent(StoreEventUserRequest $request)
+    public function buyBatch(BuyBatchRequest $request)
     {
         try {
             $data = $request->validated();
@@ -48,21 +48,21 @@ class EventController
                     'message' => 'Algum dado invalido, preencha os dados corretamente!'
                 ], 400);
             }
-            $this->eventService->addUserToEvent($data);
+            $this->batchService->buyBatch($data);
 
             return response()->json([
                 'success' => true,
-                'message' => 'O usuario foi inscrito no evento com sucesso!',
+                'message' => 'O lote foi comprado com sucesso!',
             ], 200);
         } catch (CustomException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ocorreu um erro atrelar o usuario ao evento, tente novamente mais tarde! Error: ' . $e->getMessage()
+                'message' => 'Ocorreu um erro ao atrelar o usuario no lote, tente novamente mais tarde! Error: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    public function checkEventStatus(CheckEventStatusRequest $request)
+    public function checkBatchStatus(CheckBatchStatusRequest $request)
     {
         try {
             $data = $request->validated();
@@ -72,7 +72,7 @@ class EventController
                     'message' => 'Ocorreu um erro ao buscar o status do lote, preencha os dados corretamente!'
                 ], 400);
             }
-            $checkStatus = $this->eventService->checkEventStatus($data);
+            $checkStatus = $this->batchService->checkBatchStatus($data);
 
             return response()->json([
                 'success' => true,
