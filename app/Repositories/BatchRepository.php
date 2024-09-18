@@ -11,6 +11,16 @@ class BatchRepository
     {
     }
 
+    public function getAll()
+    {
+        return Batch::with('event')->get();
+    }
+
+    public function getBatchesByEvent($eventId)
+    {
+        return Batch::where('event_id', $eventId)->get();
+    }
+
     public function store($data)
     {
         return Batch::create($data);
@@ -45,5 +55,11 @@ class BatchRepository
     {
         $redisKey = 'lock_batch:' . $batchId;
         Redis::incr($redisKey);
+    }
+
+    public function deleteUserInLock($batchId)
+    {
+        $redisKey = 'lock_batch:' . $batchId;
+        Redis::decr($redisKey);
     }
 }

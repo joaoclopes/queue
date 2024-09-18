@@ -3,7 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class QueueWaitException extends Exception
 {
@@ -12,14 +12,10 @@ class QueueWaitException extends Exception
         parent::__construct($message);
     }
 
-    public function render($request): JsonResponse
+    public function render($request): RedirectResponse
     {
-        return response()->json([
-            'status' => 409,
-            'redirect' => route('queue'),
-            'message' => $this->getMessage(),
-            'user_id' => $request->input('user_id'),
-            'event_id' => $request->input('event_id')
-        ], 409);
+        $userId = $request->input('user_id');
+        $batchId = $request->input('batch_id');
+        return redirect()->route('queue')->with(compact('userId', 'batchId'));
     }
 }

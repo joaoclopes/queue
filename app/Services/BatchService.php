@@ -12,6 +12,16 @@ class BatchService
     {
     }
 
+    public function getAll()
+    {
+        return $this->batchRepository->getAll();
+    }
+
+    public function getBatchesByEvent($eventId)
+    {
+        return $this->batchRepository->getBatchesByEvent($eventId);
+    }
+
     public function store($data)
     {
         return $this->batchRepository->store($data);
@@ -30,8 +40,8 @@ class BatchService
             // fazer o usuario entrar na fila
             throw new QueueWaitException();
         }
-        $this->batchRepository->updateSlotsAvailable($data['event_id']);
-        return $this->batchRepository->buyBatch($data);
+        $this->batchRepository->updateSlotsAvailable($data['batch_id']);
+
         return true;
     }
 

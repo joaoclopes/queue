@@ -3,7 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class TicketSoldOutException extends Exception
 {
@@ -12,11 +12,8 @@ class TicketSoldOutException extends Exception
         parent::__construct($message);
     }
 
-    public function render($request): JsonResponse
+    public function render($request): RedirectResponse
     {
-        return response()->json([
-            'error' => 'Ticket Sold Out',
-            'message' => $this->getMessage(),
-        ], 409);
+        return redirect()->route('home')->with('error', $this->getMessage());
     }
 }

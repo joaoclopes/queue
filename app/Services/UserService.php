@@ -14,4 +14,9 @@ class UserService
     {
         return $this->userRepository->store($data);
     }
+
+    public function getAll()
+    {
+        return $this->userRepository->getAll();
+    }
 }

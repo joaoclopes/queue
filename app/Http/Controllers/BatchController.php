@@ -7,11 +7,25 @@ use App\Http\Requests\Batch\CheckBatchStatusRequest;
 use App\Http\Requests\Batch\BuyBatchRequest;
 use App\Http\Requests\Batch\StoreBatchRequest;
 use App\Services\BatchService;
+use App\Services\EventService;
 
 class BatchController
 {
-    public function __construct(private BatchService $batchService)
+    public function __construct(private BatchService $batchService, private EventService $eventService)
     {
+    }
+
+    public function index()
+    {
+        $batches = $this->batchService->getAll();
+        $events = $this->eventService->getAll();
+        return view('batches.index', compact('batches', 'events'));
+    }
+
+    public function getBatchesByEvent($eventId)
+    {
+        $batches = $this->batchService->getBatchesByEvent($eventId);
+        return response()->json($batches);
     }
 
     public function store(StoreBatchRequest $request)
@@ -26,10 +40,7 @@ class BatchController
             }
             $this->batchService->store($data);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'O lote foi criado com sucesso!',
-            ], 200);
+            return redirect()->route('batches.index');
         } catch (CustomException $e) {
             return response()->json([
                 'success' => false,

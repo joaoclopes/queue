@@ -12,6 +12,8 @@ class Batch extends Model
 {
     use HasFactory, HasUuids;
 
+    protected $table = 'batchs';
+
     protected $fillable = ['name', 'event_id', 'slots', 'slots_available'];
 
     public function event(): BelongsTo

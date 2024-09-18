@@ -11,6 +11,11 @@ class EventRepository
     {
     }
 
+    public function getAll()
+    {
+        return Event::all();
+    }
+
     public function store($data)
     {
         return Event::create($data);

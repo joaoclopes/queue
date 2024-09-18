@@ -12,6 +12,12 @@ class UserController extends Controller
     {
     }
 
+    public function index()
+    {
+        $users = $this->userService->getAll();
+        return view('users.index', compact('users'));
+    }
+
     public function store(StoreUserRequest $request)
     {
         try {
@@ -24,10 +30,7 @@ class UserController extends Controller
             }
             $this->userService->store($userData);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'O usuario foi criado com sucesso!',
-            ], 200);
+            return redirect()->route('users.index');
         } catch(CustomException $e) {
             return response()->json([
                 'success' => false,

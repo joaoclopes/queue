@@ -13,6 +13,11 @@ class EventService
     {
     }
 
+    public function getAll()
+    {
+        return $this->eventRepository->getAll();
+    }
+
     public function store($data)
     {
         return $this->eventRepository->store($data);

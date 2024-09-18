@@ -1,0 +1,26 @@
+header {
+    background-color: #333;
+    padding: 1rem;
+}
+.nav-items {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+}
+.nav-items li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 15px;
+}
+.nav-items li a:hover {
+    color: #f0a500;
+}
+
+.nav-items li a.active {
+    background-color: #f0a500;
+    color: #303336;
+    border-radius: 5px;
+}
