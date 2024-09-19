@@ -8,6 +8,7 @@ use App\Http\Requests\Batch\BuyBatchRequest;
 use App\Http\Requests\Batch\StoreBatchRequest;
 use App\Services\BatchService;
 use App\Services\EventService;
+use Illuminate\Http\RedirectResponse;
 
 class BatchController
 {

@@ -19,9 +19,9 @@ class HomeController extends Controller
         return view('home', compact('users', 'events'));
     }
 
-    public function queue()
+    public function queue($batchId, $userId)
     {
-        return view('queue.index');
+        return view('queue.index', compact('batchId', 'userId'));
     }
 
     public function buy()

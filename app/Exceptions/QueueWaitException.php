@@ -3,7 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 
 class QueueWaitException extends Exception
 {
@@ -12,10 +12,12 @@ class QueueWaitException extends Exception
         parent::__construct($message);
     }
 
-    public function render($request): RedirectResponse
+    public function render($request): JsonResponse
     {
-        $userId = $request->input('user_id');
-        $batchId = $request->input('batch_id');
-        return redirect()->route('queue')->with(compact('userId', 'batchId'));
+        return response()->json([
+            'success' => false,
+            'queue' => true,
+            'message' => 'O evento esta com fila, aguarde para ver se consegue um ingresso!'
+        ], 409);
     }
 }

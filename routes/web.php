@@ -6,7 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-route::get('/queue', [HomeController::class, 'queue'])->name('queue');
+route::get('/queue/{batchId}/{userId}', [HomeController::class, 'queue'])->name('queue');
 
 route::get('/buy', [HomeController::class, 'buy'])->name('buy');
 
