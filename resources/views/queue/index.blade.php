@@ -21,7 +21,7 @@
         function manageQueue(userId, batchId) {
             socket.emit('manageQueue', { userId, batchId });
             socket.on('queuePosition', (data) => {
-                document.getElementById('queue-position').innerHTML = `${data.position}`;
+                document.getElementById('queue-position').innerHTML = `${data.position ?? data.initialPosition}º`;
             });
         }
 

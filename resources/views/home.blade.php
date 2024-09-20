@@ -98,7 +98,7 @@
                             showConfirmButton: 'OK'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                window.location.href = `/queue/${userId}/${batchId}`;
+                                window.location.href = `/queue/${batchId}/${userId}`;
                             }
                         });
                         return;
